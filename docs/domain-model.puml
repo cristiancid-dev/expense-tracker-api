@@ -1,0 +1,53 @@
+@startuml
+hide methods
+skinparam classAttributeIconSize 0
+
+class User {
+  id : Long
+  name : String
+  email : String
+  password : String
+  createdAt : LocalDateTime
+}
+
+class Account {
+  id : Long
+  name : String
+  createdAt : LocalDateTime
+}
+
+class Category {
+  id : Long
+  name : String
+  type : CategoryType
+  createdAt : LocalDateTime
+}
+
+class Transaction {
+  id : Long
+  amount : BigDecimal
+  description : String
+  date : LocalDate
+  createdAt : LocalDateTime
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+}
+
+User "1" -- "0..*" Account
+User "1" -- "0..*" Category
+User "1" -- "0..*" Transaction
+
+Account "1" -- "0..*" Transaction
+Category "1" -- "0..*" Transaction
+
+Category --> CategoryType
+Transaction --> User
+Transaction --> Account
+Transaction --> Category
+Account --> User
+Category --> User
+
+@enduml
