@@ -27,14 +27,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleUserNotFoundException(EmailAlreadyExistsException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("error", ex.getMessage());
-        return ResponseEntity.status(400).body(error);
+        return ResponseEntity.status(409).body(error);
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<Map<String, String>> handleUserNotFoundException(InvalidCredentialsException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("error", ex.getMessage());
-        return ResponseEntity.status(400).body(error);
+        return ResponseEntity.status(401).body(error);
     }
 
 }
