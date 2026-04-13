@@ -1,6 +1,7 @@
 package com.cristiancid.expensetracker.controller;
 
 import com.cristiancid.expensetracker.dto.CreateCategoryRequest;
+import com.cristiancid.expensetracker.dto.UpdateCategoryRequest;
 import com.cristiancid.expensetracker.model.Category;
 import com.cristiancid.expensetracker.service.CategoryService;
 import jakarta.validation.Valid;
@@ -35,6 +36,12 @@ public class CategoryController {
 
         Page<Category> categories = categoryService.getCategories(pageable);
         return ResponseEntity.ok(categories);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Category> updateCategory(@PathVariable Long id,
+                                                   @Valid @RequestBody UpdateCategoryRequest request) {
+        return ResponseEntity.ok(categoryService.updateCategory(id, request));
     }
 
     @DeleteMapping("/{id}")

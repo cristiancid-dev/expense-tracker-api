@@ -1,6 +1,7 @@
 package com.cristiancid.expensetracker.service;
 
 import com.cristiancid.expensetracker.dto.CreateCategoryRequest;
+import com.cristiancid.expensetracker.dto.UpdateCategoryRequest;
 import com.cristiancid.expensetracker.exception.CategoryAlreadyExistsException;
 import com.cristiancid.expensetracker.exception.CategoryNotFoundException;
 import com.cristiancid.expensetracker.model.Category;
@@ -39,6 +40,19 @@ public class CategoryService {
     public Page<Category> getCategories(Pageable pageable) {
         User user = getAuthenticatedUser();
         return categoryRepository.findByUser(user, pageable);
+    }
+
+    public Category updateCategory(Long id, UpdateCategoryRequest request) {
+        User user = getAuthenticatedUser();
+        Category category = categoryRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new CategoryNotFoundException("Category not found"));
+        if (categoryRepository.existsByUserAndNameAndTypeAndIdNot(user, request.getName(),
+                request.getType(), id)) {
+            throw new CategoryAlreadyExistsException("Category already exists");
+        }
+        category.setName(request.getName());
+        category.setType(request.getType());
+        return categoryRepository.save(category);
     }
 
     public void deleteCategory(Long id) {
