@@ -14,7 +14,8 @@ public class CreateCategoryRequest {
     @NotNull(message = "type cannot be null")
     private CategoryType type;
 
-    public CreateCategoryRequest() {}
+    public CreateCategoryRequest() {
+    }
 
     public CreateCategoryRequest(String name, CategoryType type) {
         this.name = name;

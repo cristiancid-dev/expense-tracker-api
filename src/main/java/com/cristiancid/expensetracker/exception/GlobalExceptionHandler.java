@@ -37,6 +37,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(401).body(error);
     }
 
+    // Category Exceptions
+
     @ExceptionHandler(CategoryAlreadyExistsException.class)
     public ResponseEntity<Map<String, String>> handleUserNotFoundException(CategoryAlreadyExistsException ex) {
         Map<String, String> error = new HashMap<>();
@@ -46,6 +48,22 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CategoryNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleUserNotFoundException(CategoryNotFoundException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.status(404).body(error);
+    }
+
+    // Account Exceptions
+
+    @ExceptionHandler(AccountAlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> handleUserNotFoundException(AccountAlreadyExistsException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.status(409).body(error);
+    }
+
+    @ExceptionHandler(AccountNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleUserNotFoundException(AccountNotFoundException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("error", ex.getMessage());
         return ResponseEntity.status(404).body(error);
