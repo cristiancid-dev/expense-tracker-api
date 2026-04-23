@@ -1,5 +1,6 @@
 package com.cristiancid.expensetracker.service;
 
+import com.cristiancid.expensetracker.dto.AccountResponse;
 import com.cristiancid.expensetracker.dto.CreateAccountRequest;
 import com.cristiancid.expensetracker.dto.UpdateAccountRequest;
 import com.cristiancid.expensetracker.exception.AccountAlreadyExistsException;
@@ -7,6 +8,7 @@ import com.cristiancid.expensetracker.exception.AccountNotFoundException;
 import com.cristiancid.expensetracker.model.Account;
 import com.cristiancid.expensetracker.model.User;
 import com.cristiancid.expensetracker.repository.AccountRepository;
+import com.cristiancid.expensetracker.repository.TransactionRepository;
 import com.cristiancid.expensetracker.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,38 +17,46 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 public class AccountService {
 
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
+    private final TransactionRepository transactionRepository;
 
-    public AccountService(AccountRepository accountRepository, UserRepository userRepository) {
+    public AccountService(AccountRepository accountRepository, UserRepository userRepository,
+                          TransactionRepository transactionRepository) {
         this.accountRepository = accountRepository;
         this.userRepository = userRepository;
+        this.transactionRepository = transactionRepository;
     }
 
-    public Account createAccount(CreateAccountRequest request) {
+    public AccountResponse createAccount(CreateAccountRequest request) {
         User user = getAuthenticatedUser();
         if (accountRepository.existsByUserAndName(user,request.getName())) {
             throw new AccountAlreadyExistsException("Account already exists");
         }
         Account newAccount = new Account(request.getName(), user);
-        return accountRepository.save(newAccount);
+        Account savedAccount = accountRepository.save(newAccount);
+        return mapToResponse(savedAccount);
     }
 
-    public Page<Account> getAccounts(Pageable pageable) {
+    public Page<AccountResponse> getAccounts(Pageable pageable) {
         User user = getAuthenticatedUser();
-        return accountRepository.findByUser(user, pageable);
+        Page<Account> accounts = accountRepository.findByUser(user, pageable);
+        return accounts.map(this::mapToResponse);
     }
 
-    public Account getAccountById(Long id) {
+    public AccountResponse getAccountById(Long id) {
         User user = getAuthenticatedUser();
-        return accountRepository.findByIdAndUser(id, user)
+        Account account = accountRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AccountNotFoundException("Account not found"));
+        return mapToResponse(account);
     }
 
-    public Account updateAccount(Long id, UpdateAccountRequest request) {
+    public AccountResponse updateAccount(Long id, UpdateAccountRequest request) {
         User user = getAuthenticatedUser();
         Account account = accountRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AccountNotFoundException("Account not found"));
@@ -54,7 +64,8 @@ public class AccountService {
             throw new AccountAlreadyExistsException("Account already exists");
         }
         account.setName(request.getName());
-        return accountRepository.save(account);
+        Account updatedAccount =  accountRepository.save(account);
+        return mapToResponse(updatedAccount);
 
     }
 
@@ -72,5 +83,12 @@ public class AccountService {
                 SecurityContextHolder.getContext().getAuthentication();
         return userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    private AccountResponse mapToResponse(Account account) {
+        Long id = account.getId();
+        String name = account.getName();
+        BigDecimal balance = transactionRepository.calculateAccountBalance(account);
+        return new AccountResponse(id, name, balance);
     }
 }

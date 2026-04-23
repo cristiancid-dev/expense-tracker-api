@@ -1,8 +1,8 @@
 package com.cristiancid.expensetracker.controller;
 
+import com.cristiancid.expensetracker.dto.AccountResponse;
 import com.cristiancid.expensetracker.dto.CreateAccountRequest;
 import com.cristiancid.expensetracker.dto.UpdateAccountRequest;
-import com.cristiancid.expensetracker.model.Account;
 import com.cristiancid.expensetracker.service.AccountService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -23,23 +23,23 @@ public class AccountController {
     }
 
     @PostMapping
-    public ResponseEntity<Account> createAccount(@Valid @RequestBody CreateAccountRequest request) {
+    public ResponseEntity<AccountResponse> createAccount(@Valid @RequestBody CreateAccountRequest request) {
         return new ResponseEntity<>(accountService.createAccount(request), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<Page<Account>> getAccounts(@PageableDefault(size = 10)Pageable pageable) {
+    public ResponseEntity<Page<AccountResponse>> getAccounts(@PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(accountService.getAccounts(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Account> getAccountById(@PathVariable Long id) {
+    public ResponseEntity<AccountResponse> getAccountById(@PathVariable Long id) {
         return ResponseEntity.ok(accountService.getAccountById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Account> updateAccount(@PathVariable Long id,
-                                                 @Valid@RequestBody UpdateAccountRequest request) {
+    public ResponseEntity<AccountResponse> updateAccount(@PathVariable Long id,
+                                                 @Valid @RequestBody UpdateAccountRequest request) {
         return ResponseEntity.ok(accountService.updateAccount(id, request));
     }
 
